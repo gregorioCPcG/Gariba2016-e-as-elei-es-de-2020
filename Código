@@ -183,3 +183,23 @@ bar + geom_bar(stat = "identity") +
        votação em bairros mais populosos, valores 
        negativos indicam o oposto") + 
   theme_bw() + theme(text = element_text(size = 12))
+
+matriz20 <- subset(gariba_e, select=c(Bairro, Gariba2016, J.Thome, J.Pasqualini, C.Hoffman, C.Tonet, J.deLiz, J.Thome))
+library(corrplot)
+matriz <- cor(matriz20[2:7], method = "pearson")
+corrplot(matriz)
+corrplot(matriz, method="square", 
+         type="upper", order="hclust",
+         diag=FALSE)
+
+matriz20$novadireita <- matriz20$J.Pasqualini + matriz20$C.Hoffman + matriz20$C.Tonet
+matriz20_ <- subset(matriz20, select=c(Bairro, Gariba2016,J.Thome,novadireita,J.deLiz))
+matriz <- cor(matriz20_[2:5], method = "pearson")
+corrplot(matriz)
+corrplot(matriz, method="square", 
+         type="upper", order="hclust",
+         diag=FALSE)
+
+corrplot(matriz, method="number", 
+         type="upper", order="hclust",
+         diag=FALSE)
