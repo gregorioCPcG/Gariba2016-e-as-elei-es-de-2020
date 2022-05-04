@@ -1,0 +1,185 @@
+# código da analise 
+# observação inicial 
+# dois arquivos serão necessário para rodar no R - eles constam na pasta raiz desse github
+
+# para onde foram os votos de Gariba
+
+# duas técnicas 
+#primeiro correlação simples
+#(já consta nesse vídeo- https://www.youtube.com/watch?v=AcHet04B2B8&list=PLYtDVCi4nrx5n-_eFFKXjIZfYoBm1BTFl)
+
+library(readxl)
+gariba_e <- read_excel("gariba_e.xlsx")
+
+# unidade de análise bairro
+gariba_e$Bairro
+
+# Thomé
+cor.test(gariba_e$Gariba2016, gariba_e$J.Thome)
+plot(gariba_e$Gariba2016, gariba_e$J.Thome) # sem relação estatisticamente sig
+#negativa, mas sem sig
+
+# Pasqualini
+cor.test(gariba_e$Gariba2016, gariba_e$J.Pasqualini)
+plot(gariba_e$Gariba2016, gariba_e$J.Pasqualini)# sem relação estatisticamente sig
+# positiva, mas sem sig
+
+
+# Jean de Liz
+cor.test(gariba_e$Gariba2016, gariba_e$J.deLiz)
+plot(gariba_e$Gariba2016, gariba_e$J.deLiz)
+# sem relação estatisticamente sig
+
+
+# Tonet
+cor.test(gariba_e$Gariba2016, gariba_e$C.Tonet)
+plot(gariba_e$Gariba2016, gariba_e$C.Tonet)
+# sem relação estatisticamente sig,o meljor até agora
+
+
+#C.Hofman
+cor.test(gariba_e$Gariba2016, gariba_e$C.Hoffman)
+plot(gariba_e$Gariba2016, gariba_e$C.Hoffman)
+# sem relação estatisticamente sig
+
+# pacotes uteis
+install.packages("coefplot")
+library(coefplot)
+install.packages("tidyverse")
+library(tidyverse)
+
+gariba_e$Gariba <- ntile(gariba_e$Gariba2016, 2)
+gariba_e$Gariba <- as.factor(gariba_e$Gariba)
+gariba_e$deLiz <- ntile(gariba_e$J.deLiz, 2)
+gariba_e$deLiz <- as.factor(gariba_e$deLiz)
+gariba_e$Thome <- ntile(gariba_e$J.Thome, 2)
+gariba_e$Thome <- as.factor(gariba_e$Thome)
+gariba_e$Pasqualini <- ntile(gariba_e$J.Pasqualini, 2)
+gariba_e$Pasqualini  <- as.factor(gariba_e$Pasqualini)
+gariba_e$Tonet <- ntile(gariba_e$C.Tonet, 2)
+gariba_e$Tonet  <- as.factor(gariba_e$Tonet)
+gariba_e$Clovis <- ntile(gariba_e$C.Hoffman, 2)
+gariba_e$Clovis  <- as.factor(gariba_e$Clovis)
+
+install.packages("sjPlot")
+library(sjPlot)
+# Thomé
+MODELO_Thome <- glm(Thome ~ Gariba, data = gariba_e,
+               family=binomial(link=logit))
+tab_model(MODELO_Thome, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+(0.11-1)*100
+# pertencer ao grupo de maior apoio à Gariba reduz em 89% a chance de pertencer ao grupo de maior apoio em Thome
+
+#Pasqualini
+MODELO_Pasq <- glm(Pasqualini ~ Gariba, data = gariba_e,
+                    family=binomial(link=logit))
+tab_model(MODELO_Pasq, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+# no sig
+
+# J. de Liz
+MODELO_Jean <- glm(deLiz ~ Gariba, data = gariba_e,
+                   family=binomial(link=logit))
+tab_model(MODELO_Jean, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+#no sig
+
+#Tonet
+MODELO_Tonet <- glm(Tonet ~ Gariba, data = gariba_e,
+                   family=binomial(link=logit))
+tab_model(MODELO_Tonet, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+# no sig
+
+# Clóvis
+MODELO_Hof <- glm(Clovis ~ Gariba, data = gariba_e,
+                   family=binomial(link=logit))
+tab_model(MODELO_Hof, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+# no sig
+
+## acrescetar pop ##########
+pasta2 <- read_excel("pasta2.xlsx")
+
+pasta2$bairro
+#4 bairros a menos
+# os dados do tse e do censo são diferentes
+
+summary(pasta2$pop)
+hist(pasta2$pop)
+#vou logaritimizar pq tem muita dispersão
+pasta2$pop_log <- log(pasta2$pop)
+summary(pasta2$pop_log)
+hist(pasta2$pop_log)
+
+cor(pasta2$Gariba2016, pasta2$pop_log)
+plot(pasta2$Gariba2016, pasta2$pop_log)
+
+gariba_e <- pasta2
+# Thomé
+MODELO_Thome2 <- lm(J.Thome ~ Gariba2016 + pop_log, data = gariba_e)
+tab_model(MODELO_Thome2, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+# só pop é sig, gariba não
+coefplot(MODELO_Thome2, intercept=FALSE)
+
+#Pasqualini
+MODELO_Pasq2 <- lm(J.Pasqualini ~ Gariba2016 + pop_log, data = gariba_e)
+tab_model(MODELO_Pasq2, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+# no sig
+
+# J. de Liz
+MODELO_Jean2 <- lm(J.deLiz ~ Gariba2016 + pop_log, data = gariba_e)
+tab_model(MODELO_Jean2, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+# só pop é sig, gariba não
+coefplot(MODELO_Jean2, intercept=FALSE)
+
+#Tonet
+MODELO_Tonet2 <- lm(C.Tonet ~ Gariba2016 + pop_log, data = gariba_e)
+tab_model(MODELO_Tonet2, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+# só pop é sig, gariba não
+coefplot(MODELO_Tonet2, intercept=FALSE)
+
+# Clóvis
+MODELO_Clovis2 <- lm(C.Hoffman ~ Gariba2016 + pop_log, data = gariba_e)
+tab_model(MODELO_Clovis2, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+#no sig
+
+# nenhum é sig com Gariba
+
+# uma outra forma de comparar é ver qual a relação com pop_log
+
+# lembremos
+cor(gariba_e$Gariba2016, gariba_e$pop_log)
+cor(gariba_e$J.Thome, gariba_e$pop_log)
+cor(gariba_e$J.deLiz, gariba_e$pop_log)
+cor(gariba_e$J.Pasqualini, gariba_e$pop_log)
+cor(gariba_e$C.Tonet, gariba_e$pop_log)
+cor(gariba_e$C.Hoffman, gariba_e$pop_log)
+
+# com excecção de Thomé, todos os outros tem correlação parecida coma  de Gariba
+# parece-me que o voto dele se espalhou mais entre os 4(menos em thomé)
+# isso pode ser uma coincidência, mas podemos especular
+# dados não agregados (individuais) seriam necessários 
+# alguém que estivesse no campo, poderia ter maior certeza
+# a tabela abaixo é uma síntese desse achado
+
+pleito <- c("Gariba2016", "Thome", "Pasqualini", "Jean", "Tonet", "Hoffman")
+cor <- c(51,-81,56,43,54,41)
+horr <- data.frame(pleito, cor)
+
+
+bar <- ggplot(horr, aes(pleito, cor))
+bar + geom_bar(stat = "identity") + 
+  labs(title = "Voto e população dos bairros de Rio do Sul", 
+       subtitle = "Gariba 2016 e eleições 2020",
+       x = "Candidato", y= "Correlação(eleição x população)",
+       caption = "Valores positivos indicam maior propensão a 
+       votação em bairros mais populosos, valores 
+       negativos indicam o oposto") + 
+  theme_bw() + theme(text = element_text(size = 12))
