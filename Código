@@ -203,3 +203,71 @@ corrplot(matriz, method="square",
 corrplot(matriz, method="number", 
          type="upper", order="hclust",
          diag=FALSE)
+
+# incluir renda familiar (censo 2010) nas análises
+
+pasta3 <- read_excel("pasta3.xlsx")
+summary(pasta3$renda2010)
+pasta3$pop_log <- log(pasta3$pop)
+pasta3$renda_log <- log(pasta3$renda2010)
+
+
+summary(pasta3$renda_log)
+summary(pasta3$pop_log)
+
+pasta3$novadireita <- matriz20$novadireita
+
+
+
+modelao <- lm(novadireita ~ Gariba2016 + renda_log + pop_log, data=pasta3)
+summary(modelao)
+coefplot(modelao, intercept=FALSE, interactive=TRUE)
+tab_model(modelao, show.ci = F, auto.label = T, show.se = T, collapse.se = T, 
+          wrap.labels = 60, p.style = "stars")
+
+
+cor(pasta3$novadireita, pasta3$renda_log)
+cor(pasta3$J.Thome, pasta3$renda_log)
+cor(pasta3$J.deLiz, pasta3$renda_log)
+cor(pasta3$pop_log, pasta3$renda_log)
+cor(pasta3$Gariba2016, pasta3$renda_log)
+
+
+pleito <- c("Gariba2016", "Thome", "Nova Direita", "Jean")
+cor <- c(33,-56,79,-30)
+horr <- data.frame(pleito, cor)
+
+
+bar <- ggplot(horr, aes(pleito, cor))
+bar + geom_bar(stat = "identity") + 
+  labs(title = "Voto e renda dos bairros de Rio do Sul", 
+       subtitle = "Gariba 2016 e eleições 2020",
+       x = "Voto", y= "Correlação(voto x renda)",
+       caption = "Valores positivos indicam maior propensão a 
+       votação em bairros mais ricos, valores 
+       negativos indicam o oposto") + 
+  theme_bw() + theme(text = element_text(size = 12))
+
+
+library(GGally)
+df <- subset(pasta3, select=c(Gariba2016, novadireita, J.deLiz,renda_log,pop_log,J.Thome))
+ggpairs(df, title="Comparando Correlações") 
+
+matriz <- cor(df[1:6], method = "pearson")
+corrplot(matriz)
+corrplot(matriz, method="square", 
+         type="upper", order="hclust",
+         diag=FALSE)
+
+df <- subset(pasta3, select=c(Gariba2016, novadireita, renda_log,pop_log,J.Thome))
+matriz <- cor(df[1:5], method = "pearson")
+corrplot(matriz)
+corrplot(matriz, method="square", 
+         type="upper", order="hclust",
+         diag=FALSE)
+
+corrplot(matriz, method="number", 
+         type="upper", order="hclust",
+         diag=FALSE)
+
+
